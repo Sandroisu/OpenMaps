@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_gravity="center_horizontal"
+    android:background="#cfd8dc"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/vertical_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_off_1"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_off_1"
+        android:tint="#80000000"
+        app:layout_constraintEnd_toStartOf="@id/piece_1"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription"/>
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_1"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_1"
+        app:layout_constraintEnd_toStartOf="@id/vertical_guideline"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_2"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_2"
+        app:layout_constraintStart_toEndOf="@id/vertical_guideline"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_off_2"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:tint="#80000000"
+        android:src="@drawable/piece_off_2"
+        app:layout_constraintStart_toEndOf="@id/piece_2"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_3"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_3"
+        app:layout_constraintEnd_toStartOf="@id/piece_4"
+        app:layout_constraintTop_toBottomOf="@id/piece_1" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_4"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_4"
+        app:layout_constraintEnd_toStartOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_1" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_5"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_5"
+        app:layout_constraintStart_toEndOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_2" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_6"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_6"
+        app:layout_constraintStart_toEndOf="@id/piece_5"
+        app:layout_constraintTop_toBottomOf="@id/piece_2" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_7"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_7"
+        app:layout_constraintEnd_toStartOf="@id/piece_8"
+        app:layout_constraintTop_toBottomOf="@id/piece_4" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_8"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_8"
+        app:layout_constraintEnd_toStartOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_4" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_9"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_9"
+        app:layout_constraintStart_toEndOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_5" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_10"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_10"
+        app:layout_constraintStart_toEndOf="@id/piece_9"
+        app:layout_constraintTop_toBottomOf="@id/piece_6" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_11"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_11"
+        app:layout_constraintEnd_toStartOf="@id/piece_12"
+        app:layout_constraintTop_toBottomOf="@id/piece_7" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_12"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_12"
+        app:layout_constraintEnd_toStartOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_8" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_13"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_13"
+        app:layout_constraintStart_toEndOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_9" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_14"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_14"
+        app:layout_constraintStart_toEndOf="@id/piece_13"
+        app:layout_constraintTop_toBottomOf="@id/piece_10" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_off_3"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:tint="#80000000"
+        android:src="@drawable/piece_off_3"
+        app:layout_constraintEnd_toStartOf="@id/piece_15"
+        app:layout_constraintTop_toBottomOf="@id/piece_11" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_15"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_15"
+        app:layout_constraintEnd_toStartOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_12" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_16"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_16"
+        app:layout_constraintStart_toEndOf="@id/vertical_guideline"
+        app:layout_constraintTop_toBottomOf="@id/piece_13" />
+
+    <ru.slatinin.openmaps.ImageButtonMap
+        android:id="@+id/piece_off_4"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/piece_off_4"
+        android:tint="#80000000"
+        app:layout_constraintStart_toEndOf="@id/piece_13"
+        app:layout_constraintTop_toBottomOf="@id/piece_14" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
