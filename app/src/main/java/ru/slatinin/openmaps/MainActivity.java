@@ -3,10 +3,10 @@ package ru.slatinin.openmaps;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -15,7 +15,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,7 +31,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements DownloadUtil.MapDownLoadListener, ConnectionChecker.CheckConnection {
+import static ru.slatinin.openmaps.DownloadWorker.SEGMENT_ARRAY_KEY;
+
+public class MainActivity extends AppCompatActivity implements ConnectionChecker.CheckConnection, DownloadProgressListener, InfoUtil.InfoDownLoadListener {
     private JSONArray infoArray;
     private ContentLoadingProgressBar clpbWholeProgress;
     private ContentLoadingProgressBar clpbSingleProgress;
@@ -63,21 +64,14 @@ public class MainActivity extends AppCompatActivity implements DownloadUtil.MapD
 
         App app = (App) getApplication();
         app.getConnectionReceiver().setListener(this);
+        app.setDownloadProgressListener(this);
 
         mPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
-        ArrayList<String> activeTiles = ibMap.getActiveTiles();
-        for (int i = 0; i < activeTiles.size(); i++) {
-            int x = mPreferences.getInt(activeTiles.get(i), 0);
-            if (x > 0) {
-                ibMap.setMarked(x);
-                btnGoToMap.setVisibility(View.VISIBLE);
-            }
-        }
 
 
         if (NetworkInfoUtil.isNetworkAvailable(this)) {
             pbInfoDownload.setVisibility(View.VISIBLE);
-            DownloadUtil.getMapInfo(new Handler(getMainLooper()), this);
+            InfoUtil.getMapInfo(new Handler(getMainLooper()), this);
         } else {
             setError("Для скачивания карт необходимо подключение к инетрнету.");
             btnDownload.setEnabled(false);
@@ -88,15 +82,21 @@ public class MainActivity extends AppCompatActivity implements DownloadUtil.MapD
                 setError("Нужно подключение к сети интернет.");
                 return;
             }
+
             if (infoArray != null && infoArray.length() > 0) {
                 ArrayList<SegmentInfo> selectedTiles = getSegments(ibMap.getSelectedTiles());
                 if (selectedTiles.size() > 0) {
                     tvError.setVisibility(View.GONE);
                     clpbWholeProgress.setMax(ibMap.getSelectedTiles().size());
                     tvInfoText.setText("Пожалуйста оставайтесь на экране до окончания загрузки.");
-                    Handler handler = new Handler(getMainLooper());
-                    DownloadUtil.downloadMapsInfo(selectedTiles, MainActivity.this, handler, MainActivity.this);
-
+                    int[] segmentNumberArray = new int[selectedTiles.size()];
+                    for (int i = 0; i < selectedTiles.size(); i++) {
+                        segmentNumberArray[i] = selectedTiles.get(i).segmentNumber;
+                    }
+                    Data.Builder data = new Data.Builder();
+                    data.putIntArray(SEGMENT_ARRAY_KEY, segmentNumberArray);
+                    OneTimeWorkRequest myWorkRequest = new OneTimeWorkRequest.Builder(DownloadWorker.class).setInputData(data.build()).build();
+                    WorkManager.getInstance(this).enqueue(myWorkRequest);
                     btnDownload.setEnabled(false);
                     if (selectedTiles.size() > 1) {
                         clpbWholeProgress.setVisibility(View.VISIBLE);
@@ -129,7 +129,19 @@ public class MainActivity extends AppCompatActivity implements DownloadUtil.MapD
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 15);
         }
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ArrayList<String> activeTiles = ibMap.getActiveTiles();
+        for (int i = 0; i < activeTiles.size(); i++) {
+            int x = mPreferences.getInt(activeTiles.get(i), 0);
+            if (x > 0) {
+                ibMap.setMarked(x);
+                btnGoToMap.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
@@ -166,58 +178,6 @@ public class MainActivity extends AppCompatActivity implements DownloadUtil.MapD
     }
 
     @Override
-    public void onProgress(long progress) {
-        clpbSingleProgress.setProgress((int) progress);
-        String prgrs = progress + "%";
-        tvSingleFilePercentage.setText(prgrs);
-    }
-
-    @Override
-    public void onSingleSegmentDone(int segmentNumber) {
-        int max = clpbWholeProgress.getMax();
-        if (max > 1) {
-            String prgrs = "Загружен " + segmentNumber + " из " + max;
-            tvWholePercentage.setText(prgrs);
-            clpbWholeProgress.setProgress(segmentNumber);
-        }
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, App.NOTIFICATION_CHANEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setColor(getResources().getColor(R.color.purple_500))
-                .setContentTitle("Скачан сегмент карты " + segmentNumber)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(segmentNumber, builder.build());
-        mPreferences.edit().putInt(String.valueOf(segmentNumber), segmentNumber).apply();
-        ibMap.setMarked(segmentNumber);
-
-    }
-
-    @Override
-    public void onDone(boolean atLeastOneSegmentDone) {
-        clpbWholeProgress.setVisibility(View.GONE);
-        clpbSingleProgress.setVisibility(View.GONE);
-        tvSingleFilePercentage.setVisibility(View.GONE);
-        tvWholePercentage.setVisibility(View.GONE);
-        btnDownload.setEnabled(atLeastOneSegmentDone);
-        btnGoToMap.setVisibility(View.VISIBLE);
-        tvInfoText.setText("Выберите районы необходимые для работы, затем нажмите кнопку 'Загрузить'");
-    }
-
-    @Override
-    public void onError(String message) {
-        setError(message);
-        clpbWholeProgress.setVisibility(View.GONE);
-        clpbSingleProgress.setVisibility(View.GONE);
-        btnDownload.setEnabled(true);
-    }
-
-    @Override
-    public void onCriticalError(String message) {
-        setError(message);
-        btnDownload.setEnabled(true);
-    }
-
-    @Override
     public void onInfoError(String message) {
         setError(message);
     }
@@ -235,6 +195,83 @@ public class MainActivity extends AppCompatActivity implements DownloadUtil.MapD
             btnDownload.setEnabled(false);
         }
     }
+
+    @Override
+    public void onConnectionChange(boolean isConnected) {
+        btnDownload.setEnabled(isConnected);
+        if (isConnected) {
+            InfoUtil.getMapInfo(new Handler(getMainLooper()), this);
+            pbInfoDownload.setVisibility(View.VISIBLE);
+            tvError.setVisibility(View.GONE);
+        } else {
+            tvInfoText.setVisibility(View.GONE);
+            tvInfoText.setText("Выберите районы необходимые для работы, затем нажмите кнопку 'Загрузить'");
+            setError("Отсутствует подключение к интернету");
+        }
+    }
+
+    @Override
+    public void showDownloadPercentage(long percentage) {
+        if (!clpbSingleProgress.isShown()) {
+            clpbSingleProgress.setVisibility(View.VISIBLE);
+            tvSingleFilePercentage.setVisibility(View.VISIBLE);
+            tvInfoText.setText("Идет загрузка, подождите");
+            btnDownload.setEnabled(false);
+        }
+        clpbSingleProgress.setProgress((int) percentage);
+        String prgrs = percentage + "%";
+        tvSingleFilePercentage.setText(prgrs);
+    }
+
+    @Override
+    public void showErrorDownloading(String error) {
+        setError(error);
+        clpbWholeProgress.setVisibility(View.GONE);
+        clpbSingleProgress.setVisibility(View.GONE);
+        tvWholePercentage.setVisibility(View.GONE);
+        tvSingleFilePercentage.setVisibility(View.GONE);
+        btnDownload.setEnabled(true);
+    }
+
+    @Override
+    public void showSingleSegmentDone(int segmentNumber) {
+        int max = clpbWholeProgress.getMax();
+        if (max > 1) {
+            if (!clpbSingleProgress.isShown()) {
+                tvWholePercentage.setVisibility(View.VISIBLE);
+                clpbWholeProgress.setVisibility(View.VISIBLE);
+            }
+            String prgrs = "Загружен " + segmentNumber + " из " + max;
+            tvWholePercentage.setText(prgrs);
+            clpbWholeProgress.setProgress(segmentNumber);
+        }
+        ibMap.setMarked(segmentNumber);
+    }
+
+    @Override
+    public void handleCriticalError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();;
+        btnDownload.setEnabled(true);
+    }
+
+    @Override
+    public void showDownloadingDone(boolean atLeastOneSegmentDone) {
+        clpbWholeProgress.setVisibility(View.GONE);
+        clpbSingleProgress.setVisibility(View.GONE);
+        tvSingleFilePercentage.setVisibility(View.GONE);
+        tvWholePercentage.setVisibility(View.GONE);
+        btnDownload.setEnabled(atLeastOneSegmentDone);
+        if (atLeastOneSegmentDone) {
+            btnGoToMap.setVisibility(View.VISIBLE);
+        }
+        tvInfoText.setText("Выберите районы необходимые для работы, затем нажмите кнопку 'Загрузить'");
+    }
+
+    private void setError(String message) {
+        tvError.setText(message);
+        tvError.setVisibility(View.VISIBLE);
+    }
+
 
     private ArrayList<SegmentInfo> getSegments(ArrayList<Integer> tilesToBeDownloaded) {
         ArrayList<SegmentInfo> segmentInfoArrayList = new ArrayList<>();
@@ -259,24 +296,5 @@ public class MainActivity extends AppCompatActivity implements DownloadUtil.MapD
             }
         }
         return segmentInfoArrayList;
-    }
-
-    @Override
-    public void onConnectionChange(boolean isConnected) {
-        btnDownload.setEnabled(isConnected);
-        if (isConnected) {
-            DownloadUtil.getMapInfo(new Handler(getMainLooper()), this);
-            pbInfoDownload.setVisibility(View.VISIBLE);
-            tvError.setVisibility(View.GONE);
-        } else {
-            tvInfoText.setVisibility(View.GONE);
-            tvInfoText.setText("Выберите районы необходимые для работы, затем нажмите кнопку 'Загрузить'");
-            setError("Отсутствует подключение к интернету");
-        }
-    }
-
-    private void setError(String message) {
-        tvError.setText(message);
-        tvError.setVisibility(View.VISIBLE);
     }
 }

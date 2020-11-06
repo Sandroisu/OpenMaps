@@ -88,7 +88,7 @@ public class MapActivity extends AppCompatActivity {
 
             mMapView.setUseDataConnection(true);
             mMapView.setMultiTouchControls(true);
-            mMapView.getController().setCenter(new GeoPoint(56.245688, 47.082170));
+            mMapView.getController().animateTo(new GeoPoint(56.245688, 47.082170));
             mMapView.getController().setZoom(10d);
             mMapView.invalidate();
            // setLocation(this);
